@@ -1,0 +1,231 @@
+{
+  "schema": "skillos.skillgraph/1",
+  "skill_id": "solar_installation_001",
+  "title": "Basic Solar Lighting Installation (12 V training rig)",
+  "version": "1.0",
+  "domain": "solar",
+  "difficulty": "beginner",
+  "estimated_duration": 45,
+  "summary": "Install a 12 V solar lighting system on an isolated training rig: battery, PWM charge controller, panel and LED load. Connection order follows the controller manufacturer convention: battery first, then load, then panel. PROCEDURE PENDING REVIEW BY A QUALIFIED SOLAR TECHNICIAN.",
+  "required_tools": ["multimeter", "insulated_screwdriver", "wire_stripper"],
+  "required_components": ["solar_panel", "battery", "charge_controller", "led_light", "inline_fuse", "cables"],
+  "entry_step": "identify_components",
+  "provenance": {"origin": "authored"},
+  "steps": [
+    {
+      "step_id": "identify_components",
+      "title": "Identify the components",
+      "kind": "identification",
+      "description": "Lay out all components on the bench and show them to the camera.",
+      "instructions": [
+        "Place the solar panel, battery, charge controller, LED lamp and inline fuse on the bench.",
+        "Hold the camera so every component is in view."
+      ],
+      "required_components": ["solar_panel", "battery", "charge_controller", "led_light", "inline_fuse"],
+      "expected_observations": ["All five components visible on the bench."],
+      "validation": {
+        "methods": [
+          {"type": "visual", "camera_guidance": "Wide shot of the whole bench.", "criteria": [
+            {"id": "panel_visible", "description": "solar panel visible", "detector_labels": ["solar_panel"]},
+            {"id": "battery_visible", "description": "12 V battery visible", "detector_labels": ["battery"]},
+            {"id": "controller_visible", "description": "charge controller visible", "detector_labels": ["charge_controller"]},
+            {"id": "led_visible", "description": "LED lamp visible", "detector_labels": ["led_light"]}
+          ]}
+        ]
+      },
+      "reference_images": ["/reference/solar_panel.svg", "/reference/battery.svg", "/reference/charge_controller.svg", "/reference/led_light.svg"],
+      "transitions": [{"to": "inspect_battery"}]
+    },
+    {
+      "step_id": "inspect_battery",
+      "title": "Inspect the battery",
+      "kind": "inspection",
+      "description": "Inspect the battery for physical damage before any connection.",
+      "instructions": ["Check the casing for cracks or swelling.", "Inspect both terminals for corrosion.", "Look for any leakage."],
+      "required_components": ["battery"],
+      "expected_observations": ["Battery casing is intact.", "Terminals are undamaged."],
+      "validation": {
+        "policy": "all",
+        "methods": [
+          {"type": "visual", "camera_guidance": "Close-up of the battery top and sides.", "criteria": [
+            {"id": "casing_intact", "description": "casing has no swelling or cracks"},
+            {"id": "terminals_clean", "description": "terminals free of corrosion"}
+          ]},
+          {"type": "learner_confirmation", "prompt": "I checked for leakage and found none."}
+        ]
+      },
+      "safety": {"critical": false, "requirements": ["Do not short-circuit the battery terminals.", "Do not use a swollen or leaking battery."]},
+      "common_mistakes": [
+        {"id": "damaged_battery_used", "description": "Battery shows damage", "correction": "Stop. Set the battery aside and ask your instructor for a replacement.", "safety_hazard": true,
+         "trigger": {"method_index": 0, "when": "contradicted", "criterion_id": "casing_intact"}}
+      ],
+      "transitions": [{"to": "check_battery_voltage"}]
+    },
+    {
+      "step_id": "check_battery_voltage",
+      "title": "Check the battery voltage",
+      "kind": "measurement",
+      "description": "Confirm the battery holds a usable charge.",
+      "instructions": ["Set the multimeter to DC volts (20 V range).", "Red probe on battery +, black probe on battery −.", "Enter the reading."],
+      "required_tools": ["multimeter"],
+      "required_components": ["battery"],
+      "expected_observations": ["Reading between 11.8 V and 13.6 V."],
+      "validation": {"methods": [
+        {"type": "measurement", "quantity": "dc_voltage", "unit": "V", "min": 11.8, "max": 13.6, "probe_points": "battery + (red) to battery − (black)"}
+      ]},
+      "safety": {"critical": true, "hazards": ["short_circuit"], "requirements": ["Never let the probe tips touch each other on the battery terminals.", "Remove rings and watches."]},
+      "common_mistakes": [
+        {"id": "battery_discharged", "description": "Battery is too discharged for installation", "correction": "Do not continue. Charge the battery or ask for a charged one.",
+         "trigger": {"method_index": 0, "when": "below_min"}},
+        {"id": "wrong_range", "description": "Reading too high for a 12 V battery", "correction": "Check the meter is on DC volts and you are measuring the battery.",
+         "trigger": {"method_index": 0, "when": "above_max"}}
+      ],
+      "transitions": [{"to": "isolate_system"}]
+    },
+    {
+      "step_id": "isolate_system",
+      "title": "Isolate the system",
+      "kind": "safety_check",
+      "description": "Make sure nothing is energised while wiring.",
+      "instructions": ["Cover the solar panel with an opaque cloth.", "Remove the inline fuse from its holder.", "Show the covered panel and the empty fuse holder to the camera."],
+      "required_components": ["solar_panel", "inline_fuse"],
+      "expected_observations": ["Panel fully covered.", "Fuse holder empty."],
+      "validation": {"policy": "all", "methods": [
+        {"type": "visual", "criteria": [
+          {"id": "panel_covered", "description": "solar panel face fully covered"},
+          {"id": "fuse_removed", "description": "inline fuse removed from holder"}
+        ]},
+        {"type": "learner_confirmation", "prompt": "The panel is covered and the fuse is out."}
+      ]},
+      "safety": {"critical": true, "hazards": [], "requirements": ["Isolate all sources before making connections."]},
+      "transitions": [{"to": "connect_battery"}]
+    },
+    {
+      "step_id": "connect_battery",
+      "title": "Connect the battery to the charge controller",
+      "kind": "action",
+      "description": "Connect the battery cables to the controller BAT terminals, positive first.",
+      "instructions": [
+        "Connect the red cable from battery + to the controller BAT+ terminal.",
+        "Connect the black cable from battery − to the controller BAT− terminal.",
+        "Tighten both screws with the insulated screwdriver.",
+        "Refit the inline fuse on the positive cable.",
+        "Measure across controller BAT+ (red probe) and BAT− (black probe)."
+      ],
+      "prerequisites": ["isolate_system", "check_battery_voltage"],
+      "required_tools": ["insulated_screwdriver", "multimeter"],
+      "required_components": ["battery", "charge_controller", "inline_fuse"],
+      "expected_observations": ["Red cable on BAT+, black cable on BAT−.", "Positive reading at controller terminals."],
+      "validation": {"policy": "all", "methods": [
+        {"type": "visual", "camera_guidance": "Close-up of the controller battery terminals.", "criteria": [
+          {"id": "red_on_bat_pos", "description": "red cable connected to BAT+ terminal"},
+          {"id": "black_on_bat_neg", "description": "black cable connected to BAT− terminal"}
+        ]},
+        {"type": "measurement", "quantity": "dc_voltage", "unit": "V", "min": 11.8, "max": 13.6, "negative_means_reversed_polarity": true,
+         "probe_points": "controller BAT+ (red probe) to BAT− (black probe)"}
+      ]},
+      "safety": {"critical": true, "hazards": ["reversed_polarity", "short_circuit", "fire"],
+        "requirements": ["Connect the battery before the panel.", "Never let the battery cables touch each other.", "Verify polarity with the multimeter before continuing."]},
+      "common_mistakes": [
+        {"id": "reversed_battery_polarity", "description": "Battery polarity is reversed at the controller", "detection": "Negative voltage across BAT+/BAT−",
+         "correction": "Remove the fuse, swap the two battery cables at the controller, refit the fuse and measure again.", "safety_hazard": true,
+         "trigger": {"method_index": 1, "when": "negative"}},
+        {"id": "red_on_wrong_terminal", "description": "Red cable is not on BAT+", "correction": "Remove the fuse and move the red cable to BAT+.", "safety_hazard": true,
+         "trigger": {"method_index": 0, "when": "contradicted", "criterion_id": "red_on_bat_pos"}},
+        {"id": "loose_battery_connection", "description": "No voltage at the controller", "correction": "Check the fuse is fitted and both screws are tight.",
+         "trigger": {"method_index": 1, "when": "below_min"}}
+      ],
+      "reference_images": ["/reference/charge_controller.svg"],
+      "transitions": [{"to": "connect_load"}]
+    },
+    {
+      "step_id": "connect_load",
+      "title": "Connect the LED lighting load",
+      "kind": "action",
+      "description": "Connect the LED lamp to the controller LOAD terminals.",
+      "instructions": ["Connect the LED + lead to LOAD+.", "Connect the LED − lead to LOAD−.", "Tighten both terminals."],
+      "prerequisites": ["connect_battery"],
+      "required_tools": ["insulated_screwdriver"],
+      "required_components": ["led_light", "charge_controller"],
+      "validation": {"policy": "all", "methods": [
+        {"type": "visual", "criteria": [
+          {"id": "led_pos_on_load_pos", "description": "LED + lead on LOAD+ terminal"},
+          {"id": "led_neg_on_load_neg", "description": "LED − lead on LOAD− terminal"}
+        ]}
+      ]},
+      "safety": {"critical": true, "hazards": ["short_circuit"], "requirements": ["Do not let the load leads touch while the battery is connected."]},
+      "transitions": [{"to": "connect_panel"}]
+    },
+    {
+      "step_id": "connect_panel",
+      "title": "Connect the solar panel",
+      "kind": "action",
+      "description": "Connect the panel to the controller PV terminals, then uncover it.",
+      "instructions": [
+        "With the panel still covered, connect panel + to PV+ and panel − to PV−.",
+        "Uncover the panel.",
+        "Measure across PV+ (red probe) and PV− (black probe)."
+      ],
+      "prerequisites": ["connect_battery"],
+      "required_tools": ["insulated_screwdriver", "multimeter"],
+      "required_components": ["solar_panel", "charge_controller"],
+      "validation": {"policy": "all", "methods": [
+        {"type": "visual", "criteria": [
+          {"id": "panel_pos_on_pv_pos", "description": "panel + lead on PV+ terminal"},
+          {"id": "panel_neg_on_pv_neg", "description": "panel − lead on PV− terminal"}
+        ]},
+        {"type": "measurement", "quantity": "dc_voltage", "unit": "V", "min": 12.0, "max": 25.0, "negative_means_reversed_polarity": true,
+         "probe_points": "controller PV+ (red probe) to PV− (black probe), panel uncovered"}
+      ]},
+      "safety": {"critical": true, "hazards": ["reversed_polarity", "short_circuit"], "requirements": ["Keep the panel covered while connecting.", "Verify panel polarity before uncovering."]},
+      "common_mistakes": [
+        {"id": "reversed_panel_polarity", "description": "Panel polarity is reversed at the controller", "correction": "Cover the panel, swap the panel leads at PV+/PV−, uncover and measure again.", "safety_hazard": true,
+         "trigger": {"method_index": 1, "when": "negative"}},
+        {"id": "panel_still_covered", "description": "Panel voltage too low", "correction": "Make sure the panel is uncovered and in light, then measure again.",
+         "trigger": {"method_index": 1, "when": "below_min"}}
+      ],
+      "transitions": [{"to": "test_system"}]
+    },
+    {
+      "step_id": "test_system",
+      "title": "Test the system",
+      "kind": "test",
+      "description": "Confirm the lamp works from the controller output.",
+      "instructions": ["Switch the controller load output on.", "Check the LED lights.", "Measure across LOAD+ and LOAD−."],
+      "prerequisites": ["connect_load", "connect_panel"],
+      "required_tools": ["multimeter"],
+      "validation": {"policy": "all", "methods": [
+        {"type": "visual", "criteria": [{"id": "led_lit", "description": "LED lamp is lit"}]},
+        {"type": "measurement", "quantity": "dc_voltage", "unit": "V", "min": 11.5, "max": 14.5, "probe_points": "controller LOAD+ (red probe) to LOAD− (black probe)"}
+      ]},
+      "transitions": [
+        {"to": "handover", "condition": {"type": "verified"}, "label": "system works"},
+        {"to": "ts_inspect_wiring", "condition": {"type": "failed"}, "label": "system test failed → troubleshoot"}
+      ]
+    },
+    {
+      "step_id": "ts_inspect_wiring",
+      "title": "Troubleshoot: inspect the wiring",
+      "kind": "inspection",
+      "description": "The test failed. Look for loose or wrong connections.",
+      "instructions": ["Check every terminal screw is tight.", "Check the LED leads are on LOAD, not PV.", "Check the load fuse, if fitted."],
+      "required_tools": ["insulated_screwdriver"],
+      "validation": {"policy": "all", "methods": [
+        {"type": "visual", "criteria": [{"id": "load_wiring_ok", "description": "LED leads firmly on LOAD+ and LOAD−"}]},
+        {"type": "learner_confirmation", "prompt": "All terminals are tight."}
+      ]},
+      "transitions": [{"to": "test_system", "label": "re-test"}]
+    },
+    {
+      "step_id": "handover",
+      "title": "Secure and hand over",
+      "kind": "action",
+      "description": "Tidy the cables and put tools away.",
+      "instructions": ["Route cables so nothing is under strain.", "Put tools away.", "Show the finished rig to the camera."],
+      "validation": {"methods": [
+        {"type": "visual", "criteria": [{"id": "rig_tidy", "description": "cables tidy, no exposed conductors"}]}
+      ]},
+      "terminal": true
+    }
+  ]
+}

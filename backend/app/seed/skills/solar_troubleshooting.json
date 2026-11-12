@@ -1,0 +1,415 @@
+{
+  "schema": "skillos.skillgraph/1",
+  "skill_id": "solar_troubleshooting_001",
+  "title": "Solar Lighting Troubleshooting (12 V training rig)",
+  "version": "1.0",
+  "domain": "solar",
+  "difficulty": "intermediate",
+  "estimated_duration": 30,
+  "summary": "Diagnose a training rig whose lamp does not light. The instructor injects one fault: discharged battery, reversed battery polarity, loose load wiring or disconnected panel. PROCEDURE PENDING REVIEW BY A QUALIFIED SOLAR TECHNICIAN.",
+  "required_tools": [
+    "multimeter",
+    "insulated_screwdriver"
+  ],
+  "required_components": [
+    "solar_panel",
+    "battery",
+    "charge_controller",
+    "led_light",
+    "inline_fuse"
+  ],
+  "entry_step": "confirm_symptom",
+  "steps": [
+    {
+      "step_id": "confirm_symptom",
+      "title": "Confirm the symptom",
+      "kind": "inspection",
+      "instructions": [
+        "Switch the load output on.",
+        "Show the controller display and the lamp to the camera."
+      ],
+      "validation": {
+        "methods": [
+          {
+            "type": "visual",
+            "criteria": [
+              {
+                "id": "led_off",
+                "description": "LED lamp is not lit while load output is on"
+              }
+            ]
+          }
+        ]
+      },
+      "transitions": [
+        {
+          "to": "measure_battery"
+        }
+      ]
+    },
+    {
+      "step_id": "measure_battery",
+      "title": "Check battery voltage",
+      "kind": "measurement",
+      "instructions": [
+        "Multimeter on DC volts.",
+        "Red probe on battery +, black on battery −."
+      ],
+      "required_tools": [
+        "multimeter"
+      ],
+      "validation": {
+        "methods": [
+          {
+            "type": "measurement",
+            "quantity": "dc_voltage",
+            "unit": "V",
+            "min": 0,
+            "max": 15,
+            "probe_points": "battery + (red) to battery − (black)"
+          }
+        ]
+      },
+      "safety": {
+        "critical": true,
+        "hazards": [
+          "short_circuit"
+        ],
+        "requirements": [
+          "Do not bridge the battery terminals with the probes."
+        ]
+      },
+      "transitions": [
+        {
+          "to": "diagnose_low_battery",
+          "condition": {
+            "type": "measurement_below",
+            "method_index": 0,
+            "value": 11.8
+          },
+          "label": "battery below 11.8 V"
+        },
+        {
+          "to": "check_controller_polarity",
+          "condition": {
+            "type": "measurement_in_range",
+            "method_index": 0
+          },
+          "label": "battery OK"
+        }
+      ]
+    },
+    {
+      "step_id": "diagnose_low_battery",
+      "title": "Diagnosis: discharged battery",
+      "kind": "decision",
+      "instructions": [
+        "Record the fault as 'battery discharged'.",
+        "Tell your instructor; do not attempt to charge it yourself."
+      ],
+      "validation": {
+        "methods": [
+          {
+            "type": "learner_confirmation",
+            "prompt": "I recorded the fault and told the instructor."
+          }
+        ]
+      },
+      "mandatory": false,
+      "terminal": true
+    },
+    {
+      "step_id": "check_controller_polarity",
+      "title": "Check polarity at the controller",
+      "kind": "measurement",
+      "instructions": [
+        "Red probe on controller BAT+, black on BAT−."
+      ],
+      "required_tools": [
+        "multimeter"
+      ],
+      "description": "Finding reversed polarity here is a correct diagnosis of the injected fault, not a learner mistake, so it routes to a repair step.",
+      "validation": {
+        "methods": [
+          {
+            "type": "measurement",
+            "quantity": "dc_voltage",
+            "unit": "V",
+            "min": -15,
+            "max": 15,
+            "probe_points": "controller BAT+ (red) to BAT− (black)"
+          }
+        ]
+      },
+      "safety": {
+        "critical": true,
+        "hazards": [
+          "reversed_polarity",
+          "short_circuit"
+        ],
+        "requirements": [
+          "If polarity is reversed, remove the fuse before touching any cable."
+        ]
+      },
+      "transitions": [
+        {
+          "to": "fix_battery_polarity",
+          "condition": {
+            "type": "measurement_below",
+            "method_index": 0,
+            "value": 0
+          },
+          "label": "reversed polarity found"
+        },
+        {
+          "to": "inspect_load_wiring",
+          "condition": {
+            "type": "measurement_in_range",
+            "method_index": 0
+          },
+          "label": "polarity OK"
+        }
+      ]
+    },
+    {
+      "step_id": "fix_battery_polarity",
+      "title": "Repair: correct the battery polarity",
+      "kind": "action",
+      "instructions": [
+        "Remove the inline fuse.",
+        "Swap the two battery cables at the controller BAT terminals.",
+        "Refit the fuse.",
+        "Measure BAT+ to BAT− again."
+      ],
+      "required_tools": [
+        "insulated_screwdriver",
+        "multimeter"
+      ],
+      "validation": {
+        "methods": [
+          {
+            "type": "measurement",
+            "quantity": "dc_voltage",
+            "unit": "V",
+            "min": 11.8,
+            "max": 13.6,
+            "negative_means_reversed_polarity": true,
+            "probe_points": "controller BAT+ (red) to BAT− (black)"
+          }
+        ]
+      },
+      "safety": {
+        "critical": true,
+        "hazards": [
+          "reversed_polarity",
+          "short_circuit"
+        ],
+        "requirements": [
+          "Fuse out before touching battery cables."
+        ]
+      },
+      "common_mistakes": [
+        {
+          "id": "reversed_battery_polarity",
+          "description": "Polarity is still reversed",
+          "correction": "Remove the fuse and swap the cables again.",
+          "safety_hazard": true,
+          "trigger": {
+            "method_index": 0,
+            "when": "negative"
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "to": "inspect_load_wiring"
+        }
+      ]
+    },
+    {
+      "step_id": "inspect_load_wiring",
+      "title": "Inspect the load wiring",
+      "kind": "inspection",
+      "required_tools": [
+        "insulated_screwdriver"
+      ],
+      "instructions": [
+        "Check the LED leads are on LOAD+ / LOAD−.",
+        "Tighten the terminals."
+      ],
+      "validation": {
+        "policy": "all",
+        "methods": [
+          {
+            "type": "visual",
+            "criteria": [
+              {
+                "id": "load_wiring_ok",
+                "description": "LED leads firmly on LOAD+ and LOAD−"
+              }
+            ]
+          },
+          {
+            "type": "learner_confirmation",
+            "prompt": "Load terminals are tight."
+          }
+        ]
+      },
+      "transitions": [
+        {
+          "to": "check_panel"
+        }
+      ]
+    },
+    {
+      "step_id": "check_panel",
+      "title": "Check the panel connection",
+      "kind": "measurement",
+      "instructions": [
+        "Uncover the panel.",
+        "Measure across controller PV+ and PV−."
+      ],
+      "required_tools": [
+        "multimeter"
+      ],
+      "validation": {
+        "methods": [
+          {
+            "type": "measurement",
+            "quantity": "dc_voltage",
+            "unit": "V",
+            "min": -25,
+            "max": 25,
+            "probe_points": "controller PV+ (red) to PV− (black)"
+          }
+        ]
+      },
+      "safety": {
+        "critical": true,
+        "hazards": [
+          "reversed_polarity"
+        ],
+        "requirements": [
+          "Cover the panel before reconnecting any panel lead."
+        ]
+      },
+      "transitions": [
+        {
+          "to": "reconnect_panel",
+          "condition": {
+            "type": "measurement_below",
+            "method_index": 0,
+            "value": 12.0
+          },
+          "label": "no / reversed panel voltage"
+        },
+        {
+          "to": "retest",
+          "condition": {
+            "type": "measurement_in_range",
+            "method_index": 0
+          },
+          "label": "panel OK"
+        }
+      ]
+    },
+    {
+      "step_id": "reconnect_panel",
+      "title": "Repair: reconnect the panel",
+      "kind": "action",
+      "instructions": [
+        "Cover the panel.",
+        "Connect panel + to PV+ and panel − to PV−.",
+        "Uncover and measure PV+ to PV−."
+      ],
+      "required_tools": [
+        "insulated_screwdriver",
+        "multimeter"
+      ],
+      "validation": {
+        "methods": [
+          {
+            "type": "measurement",
+            "quantity": "dc_voltage",
+            "unit": "V",
+            "min": 12.0,
+            "max": 25.0,
+            "negative_means_reversed_polarity": true,
+            "probe_points": "controller PV+ (red) to PV− (black)"
+          }
+        ]
+      },
+      "safety": {
+        "critical": true,
+        "hazards": [
+          "reversed_polarity"
+        ],
+        "requirements": [
+          "Panel covered while connecting."
+        ]
+      },
+      "common_mistakes": [
+        {
+          "id": "reversed_panel_polarity",
+          "description": "Panel polarity reversed",
+          "correction": "Cover the panel and swap the panel leads.",
+          "safety_hazard": true,
+          "trigger": {
+            "method_index": 0,
+            "when": "negative"
+          }
+        },
+        {
+          "id": "panel_still_disconnected",
+          "description": "Still no panel voltage",
+          "correction": "Check both leads are fully seated and the panel is uncovered.",
+          "trigger": {
+            "method_index": 0,
+            "when": "below_min"
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "to": "retest"
+        }
+      ]
+    },
+    {
+      "step_id": "retest",
+      "title": "Re-test the system",
+      "kind": "test",
+      "required_tools": [
+        "multimeter"
+      ],
+      "instructions": [
+        "Switch the load on.",
+        "Confirm the LED lights.",
+        "Measure LOAD+ to LOAD−."
+      ],
+      "validation": {
+        "policy": "all",
+        "methods": [
+          {
+            "type": "visual",
+            "criteria": [
+              {
+                "id": "led_lit",
+                "description": "LED lamp is lit"
+              }
+            ]
+          },
+          {
+            "type": "measurement",
+            "quantity": "dc_voltage",
+            "unit": "V",
+            "min": 11.5,
+            "max": 14.5,
+            "probe_points": "LOAD+ (red) to LOAD− (black)"
+          }
+        ]
+      },
+      "terminal": true
+    }
+  ]
+}
