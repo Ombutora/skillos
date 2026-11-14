@@ -21,7 +21,7 @@ from app.models import (
     ValidationResult,
     VersionStatus,
 )
-from app.sessions.state_machine import ACCEPTS_EVIDENCE, TERMINAL, S, check
+from app.sessions.state_machine import ACCEPTS_EVIDENCE, TERMINAL, InvalidTransition, S, check
 from app.skillgraph.schema import SkillGraph, Step
 from app.validation.evidence import Evidence, StepVerdict, Verdict, evaluate_step
 
@@ -49,7 +49,10 @@ def _event(db: DB, sess: LearningSession, type_: str, step: str | None = None, d
 
 
 def _move(db: DB, sess: LearningSession, dst: S, reason: str, data: dict | None = None) -> None:
-    check(sess.state, dst.value)
+    try:
+        check(sess.state, dst.value)
+    except InvalidTransition as e:
+        raise SessionError("invalid_transition", str(e)) from None
     _event(db, sess, "state_changed", sess.current_step, {"reason": reason, **(data or {})}, sess.state, dst.value)
     sess.state = dst.value
 

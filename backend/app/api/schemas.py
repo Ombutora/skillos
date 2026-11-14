@@ -191,6 +191,8 @@ class EvidenceResultOut(BaseModel):
     validation: ValidationOut
     session: SessionOut
     next_action: str | None
+    detections: list[dict] | None = None  # detector hints (observe endpoint only)
+    observations: list[dict] | None = None  # observation-agent output (observe endpoint only)
 
 
 class ReportOut(ORM):

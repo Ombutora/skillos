@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: skillos
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-skillos-dev}
+      POSTGRES_DB: skillos
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U skillos"]
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+
+  api:
+    build: ./backend
+    env_file: [.env]
+    environment:
+      SKILLOS_DATABASE_URL: postgresql+psycopg://skillos:${POSTGRES_PASSWORD:-skillos-dev}@db:5432/skillos
+      SKILLOS_REDIS_URL: redis://redis:6379/0
+    volumes: [storage:/data/storage]
+    ports: ["8000:8000"]
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+
+  worker:
+    build: ./backend
+    command: ["rq", "worker", "skillos", "--url", "redis://redis:6379/0"]
+    env_file: [.env]
+    environment:
+      SKILLOS_DATABASE_URL: postgresql+psycopg://skillos:${POSTGRES_PASSWORD:-skillos-dev}@db:5432/skillos
+      SKILLOS_REDIS_URL: redis://redis:6379/0
+      SKILLOS_SEED_DEMO_DATA: "false"
+    volumes: [storage:/data/storage]
+    depends_on: [api]
+
+volumes:
+  pgdata:
+  storage:

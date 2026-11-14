@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./skillos.db"
     redis_url: str | None = None
 
-    jwt_secret: str = "change-me-in-production"
+    jwt_secret: str = "change-me-in-production-dev-only-secret-0000"
     jwt_algorithm: str = "HS256"
     access_token_minutes: int = 30
     refresh_token_days: int = 7
@@ -42,6 +42,6 @@ def get_settings() -> Settings:
     s.openai_api_key = s.openai_api_key or os.getenv("OPENAI_API_KEY")
     s.openai_model = s.openai_model or os.getenv("OPENAI_MODEL")
     s.openai_transcription_model = s.openai_transcription_model or os.getenv("OPENAI_TRANSCRIPTION_MODEL")
-    if s.env == "production" and s.jwt_secret == "change-me-in-production":
+    if s.env == "production" and s.jwt_secret.startswith("change-me-in-production"):
         raise RuntimeError("SKILLOS_JWT_SECRET must be set in production")
     return s
