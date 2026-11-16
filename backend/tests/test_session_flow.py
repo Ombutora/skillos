@@ -267,3 +267,24 @@ def test_same_skill_trains_learners_consistently(client, learner, vision):
     for k in ("task_completion", "correct_sequence", "safety_compliance", "tool_selection", "mistakes", "path"):
         assert a[k] == b[k]
     assert reports[0]["session_level"] == reports[1]["session_level"]
+
+
+def test_websocket_pushes_validation(client, learner, vision):
+    run = Run(client, learner, "solar_installation_001")
+    token = learner["Authorization"].split()[1]
+    with client.websocket_connect(f"{API}/sessions/{run.id}/ws?token={token}") as ws:
+        run.observe("identify_components")
+        msg = ws.receive_json()
+        assert msg["type"] == "validation"
+        assert msg["validation"]["verdict"] == "VERIFIED"
+        assert msg["session"]["current_step"] == "inspect_battery"
+
+
+def test_websocket_rejects_bad_token(client, learner):
+    import pytest
+    from starlette.websockets import WebSocketDisconnect
+
+    run = Run(client, learner, "solar_installation_001")
+    with pytest.raises(WebSocketDisconnect):
+        with client.websocket_connect(f"{API}/sessions/{run.id}/ws?token=bogus") as ws:
+            ws.receive_json()

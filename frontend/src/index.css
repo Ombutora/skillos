@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+/* Design tokens. Navy foundation, light content surfaces, one restrained blue accent,
+   and three semantic states that always mean the same thing:
+   verified = green, uncertain = amber, failed / safety = red. */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --color-ink-950: #070b14;
+  --color-ink-900: #0b1220;
+  --color-ink-800: #111a2e;
+  --color-ink-700: #1a2640;
+  --color-ink-600: #2a3a5c;
+  --color-ink-400: #7c8aa8;
+  --color-ink-300: #a9b4cc;
+
+  --color-surface: #ffffff;
+  --color-surface-2: #f4f6fa;
+  --color-line: #e3e8f0;
+  --color-text: #0f172a;
+  --color-muted: #5b6678;
+
+  --color-accent: #2f6bff;
+  --color-accent-strong: #1f54d9;
+  --color-accent-soft: #e8efff;
+
+  --color-verified: #0e9f6e;
+  --color-verified-soft: #e3f7ee;
+  --color-uncertain: #c27c0e;
+  --color-uncertain-soft: #fdf3e0;
+  --color-failed: #d92d20;
+  --color-failed-soft: #fde8e7;
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgb(47 107 255 / 0.45); } 100% { box-shadow: 0 0 0 10px rgb(47 107 255 / 0); } }
+.live-dot { animation: pulse-ring 1.6s ease-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

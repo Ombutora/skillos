@@ -18,7 +18,7 @@ First domain: **low-voltage (12 V) solar lighting installation and troubleshooti
 | Video → skill extraction pipeline (FFmpeg + OpenAI) | ✅ implemented; needs `OPENAI_API_KEY`, `OPENAI_MODEL` and FFmpeg to run. Not yet tested against a real video |
 | Camera observation (OpenAI vision) | ✅ implemented; needs OpenAI config. Tests use a stub |
 | YOLO detector | interface only; needs weights trained on solar components |
-| React web app | ⏳ next |
+| React web app (13 pages: landing, auth, dashboards, library, workspace with camera, capture, review/graph editor, reports, competency, org, admin) | ✅ builds and runs against the API; camera flow needs a real browser + OpenAI config |
 | Android app (Kotlin) | ⏳ planned |
 | Alembic migrations | ⏳ planned (tables are created on startup for now) |
 
@@ -57,6 +57,18 @@ Open http://localhost:8000/docs for the interactive API docs. By default this us
 
 Password for all: `skillos-demo-2026`
 
+## Run the web app
+
+Requires Node 20+. With the API running on port 8000:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:5173. The dev server proxies `/api` (including WebSockets) to the API.
+
 ## Run with Docker
 
 ```bash
@@ -92,5 +104,12 @@ backend/app/
   video/        FFmpeg processing, extraction pipeline
   cv/           detector interface
   seed/         demo data and the three solar modules
+frontend/src/
+  api/          typed client with token refresh
+  auth/         auth context
+  components/   app shell and UI primitives
+  features/     learning workspace panels
+  hooks/        data, camera and live-session hooks
+  pages/        routes
 docs/           architecture
 ```
