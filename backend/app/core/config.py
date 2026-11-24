@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -26,6 +27,16 @@ class Settings(BaseSettings):
     openai_model: str | None = None
     openai_transcription_model: str | None = None
 
+    # Which provider handles chat/vision calls: "openai" or "hf" (Hugging Face Inference Providers).
+    ai_provider: Literal["openai", "hf"] = "openai"
+    # Hugging Face. HF_TOKEN is also read without the prefix.
+    hf_token: str | None = None
+    hf_model: str | None = None  # a vision-capable chat model, e.g. Qwen/Qwen2.5-VL-72B-Instruct
+    hf_base_url: str = "https://router.huggingface.co/v1"
+
+    # Local transcription with faster-whisper (e.g. "small"). Takes precedence over OpenAI transcription.
+    whisper_model: str | None = None
+
     # Validation thresholds (deterministic, not AI-controlled).
     visual_confidence_threshold: float = 0.8
     extraction_confidence_warning: float = 0.6
@@ -42,6 +53,7 @@ def get_settings() -> Settings:
     s.openai_api_key = s.openai_api_key or os.getenv("OPENAI_API_KEY")
     s.openai_model = s.openai_model or os.getenv("OPENAI_MODEL")
     s.openai_transcription_model = s.openai_transcription_model or os.getenv("OPENAI_TRANSCRIPTION_MODEL")
+    s.hf_token = s.hf_token or os.getenv("HF_TOKEN")
     if s.env == "production" and s.jwt_secret.startswith("change-me-in-production"):
         raise RuntimeError("SKILLOS_JWT_SECRET must be set in production")
     return s

@@ -127,7 +127,9 @@ export function Capture() {
         <div className="mb-5 rounded-lg border border-uncertain/40 bg-uncertain-soft p-4 text-sm text-uncertain">
           <p className="font-semibold">Extraction is not fully configured on this server</p>
           <ul className="mt-1 list-disc pl-5">
-            {!caps.data.ai && <li>AI is off: set <span className="font-mono">OPENAI_API_KEY</span> and <span className="font-mono">OPENAI_MODEL</span>.</li>}
+            {!caps.data.ai && (caps.data.ai_provider === "hf"
+              ? <li>AI is off: set <span className="font-mono">HF_TOKEN</span> and <span className="font-mono">SKILLOS_HF_MODEL</span>.</li>
+              : <li>AI is off: set <span className="font-mono">OPENAI_API_KEY</span> and <span className="font-mono">OPENAI_MODEL</span>.</li>)}
             {!caps.data.ffmpeg && <li>FFmpeg is not installed (it is included in the Docker image).</li>}
           </ul>
           <p className="mt-1">You can still upload videos now and run extraction later.</p>

@@ -10,7 +10,9 @@ os.environ.update({
     "SKILLOS_SEED_DEMO_DATA": "false",
     "SKILLOS_JWT_SECRET": "test-secret-key-that-is-long-enough-for-hs256",
 })
-for k in ("OPENAI_API_KEY", "OPENAI_MODEL", "SKILLOS_OPENAI_API_KEY", "SKILLOS_OPENAI_MODEL", "SKILLOS_REDIS_URL"):
+for k in ("OPENAI_API_KEY", "OPENAI_MODEL", "SKILLOS_OPENAI_API_KEY", "SKILLOS_OPENAI_MODEL", "SKILLOS_REDIS_URL",
+          "OPENAI_TRANSCRIPTION_MODEL", "SKILLOS_AI_PROVIDER", "HF_TOKEN", "SKILLOS_HF_TOKEN", "SKILLOS_HF_MODEL",
+          "SKILLOS_WHISPER_MODEL"):
     os.environ.pop(k, None)
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 

@@ -92,11 +92,11 @@ def processing_status(video_id: str, user: User = Depends(require(*EDITORS)), db
 @router.post("/extraction/{video_id}", response_model=JobOut, status_code=202)
 def start_extraction(video_id: str, background: BackgroundTasks, user: User = Depends(require(*EDITORS)),
                      db: Session = Depends(get_db)):
-    from app.ai.gateway import ai_available
+    from app.ai.gateway import AINotConfigured, ai_available
 
     v = same_org(db.get(UploadedVideo, video_id), user)
     if not ai_available():
-        raise HTTPException(503, "AI is not configured: set OPENAI_API_KEY and OPENAI_MODEL to run extraction")
+        raise HTTPException(503, str(AINotConfigured()))
     job = ProcessingJob(org_id=v.org_id, video_id=v.id, kind="extraction")
     db.add(job)
     db.flush()

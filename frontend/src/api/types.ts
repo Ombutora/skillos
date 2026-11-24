@@ -91,4 +91,11 @@ export interface Competency {
 
 export interface Video { id: string; title: string; original_filename: string; content_type: string; size_bytes: number; duration_s: number | null; created_at: string }
 export interface Job { id: string; video_id: string; kind: string; status: "queued" | "running" | "succeeded" | "failed"; stage: string; progress: number; result: Record<string, unknown>; error: string | null; created_at: string }
-export interface Capabilities { ai: boolean; ffmpeg: boolean; detector: { available: boolean; reason: string | null } }
+export interface Capabilities {
+  ai: boolean;
+  ai_provider: "openai" | "hf";
+  ai_model: string | null;
+  transcription: "whisper" | "openai" | null;
+  ffmpeg: boolean;
+  detector: { available: boolean; reason: string | null };
+}
