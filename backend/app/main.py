@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 import app.models  # noqa: F401  (register tables)
-from app.ai.gateway import ai_available
+from app.ai.gateway import ai_available, model_name, provider, transcription_backend
 from app.api.v1 import assessments, auth, sessions, skills, videos
 from app.core.config import get_settings
 from app.core.db import Base, SessionLocal, engine
@@ -58,4 +58,6 @@ def capabilities(_=Depends(current_user)):
     """What is actually configured, so the UI can show limitations instead of pretending."""
     import shutil
 
-    return {"ai": ai_available(), "detector": detector_status(), "ffmpeg": bool(shutil.which("ffmpeg"))}
+    return {"ai": ai_available(), "ai_provider": provider(), "ai_model": model_name(),
+            "transcription": transcription_backend(), "detector": detector_status(),
+            "ffmpeg": bool(shutil.which("ffmpeg"))}

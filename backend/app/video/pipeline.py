@@ -65,7 +65,7 @@ def run_extraction(job_id: str, db: Session | None = None) -> None:
 
         _stage(db, job, "compiling", 0.85)
         graph = extraction.compile_draft(draft, video_id=video.id, job_id=job.id, segments=segments,
-                                         model=get_settings().openai_model)
+                                         model=gateway.model_name())
 
         _stage(db, job, "validating", 0.92)
         skill = service.create_skill(db, user, graph, "Generated from video; pending expert review",
