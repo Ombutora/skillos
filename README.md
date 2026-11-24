@@ -15,8 +15,9 @@ First domain: **low-voltage (12 V) solar lighting installation and troubleshooti
 | Deterministic evidence validation (VERIFIED / UNCERTAIN / FAILED) | ✅ working, tested |
 | Competency scoring + progression levels | ✅ working, tested |
 | REST API (auth, RBAC, org isolation, skills, videos, sessions, assessments) | ✅ working, tested |
-| Video → skill extraction pipeline (FFmpeg + OpenAI) | ✅ implemented; needs `OPENAI_API_KEY`, `OPENAI_MODEL` and FFmpeg to run. Not yet tested against a real video |
-| Camera observation (OpenAI vision) | ✅ implemented; needs OpenAI config. Tests use a stub |
+| Video → skill extraction pipeline (FFmpeg + OpenAI or Hugging Face) | ✅ implemented; needs AI provider config and FFmpeg to run. Not yet tested against a real video |
+| AI providers: OpenAI, Hugging Face Inference Providers; local Whisper transcription | ✅ implemented; Hugging Face path tested with a fake client, not yet against live models |
+| Camera observation (vision model) | ✅ implemented; needs AI provider config. Tests use a stub |
 | YOLO detector | interface only; needs weights trained on solar components |
 | React web app (13 pages: landing, auth, dashboards, library, workspace with camera, capture, review/graph editor, reports, competency, org, admin) | ✅ builds and runs against the API; camera flow needs a real browser + OpenAI config |
 | Android app (Kotlin) | ⏳ planned |
@@ -87,7 +88,20 @@ python -m pytest -q
 
 ## Configuration
 
-See [.env.example](.env.example). Without OpenAI settings, extraction returns `503 AI is not configured`, camera observation returns 503, and the assistant shows the approved step text with a label saying so. `GET /api/v1/system/capabilities` reports what is configured.
+See [.env.example](.env.example). Without AI settings, extraction returns `503 AI is not configured`, camera observation returns 503, and the assistant shows the approved step text with a label saying so. `GET /api/v1/system/capabilities` reports what is configured.
+
+### AI provider
+
+`SKILLOS_AI_PROVIDER` picks who handles chat and vision calls:
+
+| Provider | Settings | Notes |
+|---|---|---|
+| `openai` (default) | `OPENAI_API_KEY`, `OPENAI_MODEL` | Responses API with strict structured outputs |
+| `hf` | `HF_TOKEN`, `SKILLOS_HF_MODEL` (e.g. `Qwen/Qwen2.5-VL-72B-Instruct`) | Hugging Face Inference Providers via the OpenAI-compatible router. The model must accept images |
+
+Every structured reply is checked against its JSON schema, whichever provider is used. Open models don't always follow a schema, so on the `hf` provider a reply that fails the check gets one retry that names the problem; if it fails again the call errors instead of passing bad data on.
+
+Transcription is set separately. `SKILLOS_WHISPER_MODEL=small` runs Whisper locally with `faster-whisper` (install it with `pip install faster-whisper`); otherwise `OPENAI_TRANSCRIPTION_MODEL` is used if set.
 
 ## Repository layout
 
